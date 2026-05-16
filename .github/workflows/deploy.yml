@@ -1,4 +1,4 @@
-name: Deploy yggrasil-service
+name: Deploy yggdrasil-service
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e
   
-            cd /home/remote/GitRepo/Yggrasil/yggrasil-service
+            cd /home/remote/GitRepo/Yggrasil/yggdrasil-service
   
             # гарантированно взять последнюю ветку master
             git fetch --all
