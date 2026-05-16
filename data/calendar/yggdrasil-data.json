@@ -1,0 +1,126 @@
+{
+  "version": 1,
+  "generatedAt": "2026-05-14T20:45:48.648Z",
+  "events": [
+    {
+      "id": 1,
+      "date": "2026-06-03T00:00:00.000Z",
+      "name": "Ozon::ЦФА::50_000",
+      "color": "#ff6b6b",
+      "description": "Закрытие вклада в Озон банке",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": -11.09765625
+    },
+    {
+      "id": 2,
+      "date": "2026-06-30T00:00:00.000Z",
+      "name": "Захар::Встреча выпускников",
+      "color": "#ff6b6b",
+      "description": "Написать Захару на тему организации встречи выпускников Гимназии 94",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 0
+    },
+    {
+      "id": 3,
+      "date": "2026-07-08T00:00:00.000Z",
+      "name": "Ozon::Кредитка::419,9",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 0
+    },
+    {
+      "id": 4,
+      "date": "2026-05-21T00:00:00.000Z",
+      "name": "Яндекс::Сплит::1_029",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 0
+    },
+    {
+      "id": 5,
+      "date": "2026-05-30T00:00:00.000Z",
+      "name": "Сбербанк::Кредитка::45_522,61",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": -43.4765625
+    },
+    {
+      "id": 6,
+      "date": "2026-05-25T00:00:00.000Z",
+      "name": "АльфаБанк::Кредитка№1::1_500",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 28.82421875
+    },
+    {
+      "id": 7,
+      "date": "2026-05-25T00:00:00.000Z",
+      "name": "АльфаБанк::Кредитка№2::1_800",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": -17.2734375
+    },
+    {
+      "id": 8,
+      "date": "2026-05-30T00:00:00.000Z",
+      "name": "УралСиб::Кредитка№2::300",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": -44.46875
+    },
+    {
+      "id": 9,
+      "date": "2026-05-30T00:00:00.000Z",
+      "name": "УралСиб::Кредитка№1::3_604,98",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 12.73828125
+    },
+    {
+      "id": 10,
+      "date": "2026-05-29T00:00:00.000Z",
+      "name": "Совком::Халва(М)::36_162",
+      "color": "#ff6b6b",
+      "description": "",
+      "tag": "",
+      "status": "active",
+      "predecessorIds": [],
+      "successorIds": [],
+      "verticalOffset": 17.125
+    }
+  ]
+}
