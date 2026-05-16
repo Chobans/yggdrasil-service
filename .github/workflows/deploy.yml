@@ -19,7 +19,7 @@ jobs:
           script: |
             set -e
   
-            cd /home/remote/GitRepo/Yggrasil/yggdrasil-service
+            cd /home/${{ secrets.SERVER_USER }}/GitRepo/Yggdrasil/yggdrasil-service
   
             # гарантированно взять последнюю ветку master
             git fetch --all
