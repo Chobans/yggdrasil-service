@@ -26,18 +26,9 @@ jobs:
             # гарантированно взять последнюю ветку master
             git fetch origin "$BRANCH"
             git reset --hard origin/"$BRANCH"
-  
-            # если на сервере в этом каталоге есть docker-compose файл — использовать docker compose
-            if [ -f docker-compose.yaml ]; then
-              echo "🐳 Deploy with docker compose"
-              docker compose -f docker-compose.yaml pull --ignore-pull-failures || true
-              docker compose -f docker-compose.yaml up -d --build --remove-orphans
-            else
-              echo "🐳 Build Docker image and run container"
-              docker build -t yggdrasil-service:latest .
             
-              docker stop yggdrasil-service || true
-              docker rm yggdrasil-service || true
+            echo "🐳 Deploy with docker compose"
+              docker compose -f docker-compose.yaml up -d --build --remove-orphans
             
               docker run -d \
               --name yggdrasil-service \
