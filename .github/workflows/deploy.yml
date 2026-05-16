@@ -4,12 +4,37 @@ on:
   push:
     branches: ["main"]
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+permissions:
+  contents: read
+  packages: write
 
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
     steps:
-      - name: Deploy to VPS via SSH
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🔑 Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🐳 Build image
+        run: |
+          docker build -t ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest .
+
+      - name: 📤 Push image
+        run: |
+          docker push ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Deploy on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -18,14 +43,24 @@ jobs:
           command_timeout: 30m
           script: |
             set -e
-            
-            BRANCH=${{ github.ref_name }}
-  
-            cd /home/${{ secrets.SERVER_USER }}/GitRepo/Yggdrasil/yggdrasil-service
-  
-            # гарантированно взять последнюю ветку master
-            git fetch origin "$BRANCH"
-            git reset --hard origin/"$BRANCH"
-            
-            echo "🐳 Deploy with docker compose"
-              docker compose -f docker-compose.yaml up -d --build --remove-orphans
+
+            IMAGE=ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest
+
+            # Залогиниться в GHCR на сервере
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} || true
+
+            # Подтянуть новый образ
+            docker pull "$IMAGE"
+
+            # Остановить и удалить старый контейнер (если есть)
+            docker stop yggdrasil-service || true
+            docker rm yggdrasil-service || true
+
+            # Запустить контейнер с теми же портами и именем, что в docker-compose
+            # Подключение тома: предполагается, что на сервере путь /home/${{ secrets.SERVER_USER }}/GitRepo/Yggdrasil/DataStorage/calendar существует
+            docker run -d \
+              --name yggdrasil-service \
+              --restart unless-stopped \
+              -p 8090:8080 \
+              -v /home/${{ secrets.SERVER_USER }}/GitRepo/Yggdrasil/DataStorage/calendar:/data/calendar \
+              "$IMAGE"
