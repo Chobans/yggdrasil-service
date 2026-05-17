@@ -3,11 +3,12 @@ package com.cedu.yggdrasilservice
 import org.springframework.stereotype.Component
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 
 data class User(val id: String, val login: String, val passwordHash: String, val token: String)
 
 @Component
-class UserRepository(val csvPath: String = "/data/users.csv") {
+class UserRepository(val csvPath: String = "/data/users/users.csv") {
 
     private val users: List<User> by lazy { loadUsers() }
 
@@ -19,7 +20,17 @@ class UserRepository(val csvPath: String = "/data/users.csv") {
 
     private fun loadUsers(): List<User> {
         val path = Paths.get(csvPath)
-        if (!Files.exists(path)) return emptyList()
+        if (!Files.exists(path)) {
+            Files.createDirectories(path.parent)
+            Files.write(
+                path,
+                (
+                    "id,login,passwordHash,token\n" +
+                    "1,cedu,gfhjkm,cedu-token\n"
+                ).toByteArray(),
+                StandardOpenOption.CREATE_NEW
+            )
+        }
 
         return Files.readAllLines(path)
             .drop(1)
@@ -37,4 +48,3 @@ class UserRepository(val csvPath: String = "/data/users.csv") {
             }
     }
 }
-

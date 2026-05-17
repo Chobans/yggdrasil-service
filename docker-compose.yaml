@@ -7,4 +7,4 @@ services:
       - "8090:8080"
     volumes:
       - ../DataStorage/calendar:/data/calendar/
-      - ../DataStorage/users.csv:/data/users.csv
+      - ../DataStorage/users/users.csv:/data/users/users.csv
