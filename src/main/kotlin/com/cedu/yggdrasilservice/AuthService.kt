@@ -3,15 +3,10 @@ package com.cedu.yggdrasilservice
 import org.springframework.stereotype.Service
 
 @Service
-class AuthService {
+class AuthService(private val userRepository: UserRepository) {
 
-    private val userToToken = mapOf(
-        "alice" to "static-token-alice",
-        "bob" to "static-token-bob"
-    )
-    private val tokenToUser = userToToken.entries.associate { (user, token) -> token to user }
-
-    fun authenticate(username: String): String? = userToToken[username]
+    fun authenticate(login: String, passwordHash: String): String? =
+        userRepository.findByLoginAndPasswordHash(login, passwordHash)?.token
 
     fun resolveUserId(authorizationHeader: String?): String? {
         val token = authorizationHeader
@@ -20,6 +15,6 @@ class AuthService {
             ?.trim()
             ?: return null
 
-        return tokenToUser[token]
+        return userRepository.findByToken(token)?.id
     }
 }

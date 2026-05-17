@@ -11,7 +11,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.security.MessageDigest
 import java.time.Instant
 
 
@@ -20,7 +19,7 @@ class CalendarService(
     private val dataStorePath: String = "/data/calendar/"
 ) {
 
-    val calendarName = "yggdrasil-data.json"
+    val calendarName = "yggdrasil-calendar.json"
 
     fun getCalendarData(fileName: String = calendarName): String {
         val fsPath = Paths.get(dataStorePath, fileName)
@@ -30,14 +29,7 @@ class CalendarService(
         val dirPath: Path = Paths.get(dataStorePath)
         Files.createDirectories(dirPath)
 
-        val mapper = ObjectMapper()
-        val root: ObjectNode = mapper.createObjectNode()
-        root.put("version", 1)
-        root.put("generatedAt", Instant.now().toString())
-        val events: ArrayNode = mapper.createArrayNode()
-        root.set<ArrayNode>("events", events)
-
-        val jsonStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root)
+        val jsonStr = emptyCalendarJson()
 
         try {
             Files.write(fsPath, jsonStr.toByteArray(), StandardOpenOption.CREATE_NEW)
@@ -49,7 +41,21 @@ class CalendarService(
     }
 
     fun getCalendarDataForUser(userId: String): String {
-        return getCalendarData(fileName = userCalendarFileName(userId))
+        val userDir = Paths.get(dataStorePath, userId)
+        val filePath = userDir.resolve(calendarName)
+
+        if (Files.exists(filePath)) return filePath.toFile().readText()
+
+        Files.createDirectories(userDir)
+        val jsonStr = emptyCalendarJson()
+
+        try {
+            Files.write(filePath, jsonStr.toByteArray(), StandardOpenOption.CREATE_NEW)
+        } catch (e: IOException) {
+            throw IOException("Failed to create calendar file at $filePath", e)
+        }
+
+        return jsonStr
     }
 
     fun updateCalendarData(file: MultipartFile, fileName: String = calendarName): File {
@@ -82,12 +88,37 @@ class CalendarService(
     }
 
     fun updateCalendarDataForUser(file: MultipartFile, userId: String): File {
-        return updateCalendarData(file = file, fileName = userCalendarFileName(userId))
+        if (file.isEmpty) throw IllegalArgumentException("file can not be empty")
+
+        val bytes = try {
+            file.bytes
+        } catch (e: IOException) {
+            throw IOException("Failed to read uploaded file", e)
+        }
+
+        try {
+            ObjectMapper().readTree(bytes.inputStream())
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Uploaded file is not valid JSON", e)
+        }
+
+        val userDir = Paths.get(dataStorePath, userId)
+        Files.createDirectories(userDir)
+
+        val filePath = userDir.resolve(calendarName)
+        Files.write(filePath, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+
+        return filePath.toFile()
     }
 
-    private fun userCalendarFileName(userId: String): String {
-        val digest = MessageDigest.getInstance("SHA-256").digest(userId.toByteArray())
-        val hashedUserId = digest.joinToString("") { "%02x".format(it) }.take(24)
-        return "yggdrasil-data-$hashedUserId.json"
+    private fun emptyCalendarJson(): String {
+        val mapper = ObjectMapper()
+        val root: ObjectNode = mapper.createObjectNode()
+        root.put("version", 1)
+        root.put("generatedAt", Instant.now().toString())
+        val events: ArrayNode = mapper.createArrayNode()
+        root.set<ArrayNode>("events", events)
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root)
     }
 }
+

@@ -23,12 +23,12 @@ class CalendarController(
     private val calendarService: CalendarService,
     private val authService: AuthService
 ) {
-    data class LoginRequest(val username: String)
+    data class LoginRequest(val login: String, val passwordHash: String)
     data class LoginResponse(val token: String)
 
     @PostMapping("/auth/login")
     fun login(@RequestBody request: LoginRequest): ResponseEntity<Any> {
-        val token = authService.authenticate(request.username)
+        val token = authService.authenticate(request.login, request.passwordHash)
             ?: return ResponseEntity("Неверные учетные данные", HttpStatus.UNAUTHORIZED)
 
         return ResponseEntity.ok(LoginResponse(token))
