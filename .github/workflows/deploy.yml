@@ -1,5 +1,8 @@
 name: Deploy yggdrasil-service
 
+env:
+  IMAGE: ${{ vars.DOCKER_IMAGE }}
+
 on:
   push:
     branches: ["main"]
@@ -24,11 +27,11 @@ jobs:
 
       - name: 🐳 Build image
         run: |
-          docker build -t ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest .
+          docker build -t "$IMAGE" .
 
       - name: 📤 Push image
         run: |
-          docker push ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest
+          docker push "$IMAGE"
 
   deploy:
     needs: build-and-push
@@ -44,7 +47,7 @@ jobs:
           script: |
             set -e
 
-            IMAGE=ghcr.io/CanisExDaemonumUrbe/yggdrasil-service:latest
+            IMAGE="${{ env.IMAGE }}"
 
             # Залогиниться в GHCR на сервере
             docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }} || true
