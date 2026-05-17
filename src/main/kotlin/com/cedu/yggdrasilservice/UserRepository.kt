@@ -9,11 +9,13 @@ data class User(val id: String, val login: String, val passwordHash: String, val
 @Component
 class UserRepository(val csvPath: String = "/data/users.csv") {
 
+    private val users: List<User> by lazy { loadUsers() }
+
     fun findByLoginAndPasswordHash(login: String, passwordHash: String): User? =
-        loadUsers().find { it.login == login && it.passwordHash == passwordHash }
+        users.find { it.login == login && it.passwordHash == passwordHash }
 
     fun findByToken(token: String): User? =
-        loadUsers().find { it.token == token }
+        users.find { it.token == token }
 
     private fun loadUsers(): List<User> {
         val path = Paths.get(csvPath)
@@ -35,3 +37,4 @@ class UserRepository(val csvPath: String = "/data/users.csv") {
             }
     }
 }
+
