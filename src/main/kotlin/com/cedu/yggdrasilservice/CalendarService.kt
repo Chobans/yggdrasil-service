@@ -11,6 +11,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.security.MessageDigest
 import java.time.Instant
 
 
@@ -85,7 +86,8 @@ class CalendarService(
     }
 
     private fun userCalendarFileName(userId: String): String {
-        val safeUserId = userId.replace(Regex("[^a-zA-Z0-9]"), "_")
-        return "yggdrasil-data-$safeUserId.json"
+        val digest = MessageDigest.getInstance("SHA-256").digest(userId.toByteArray())
+        val hashedUserId = digest.joinToString("") { "%02x".format(it) }.take(24)
+        return "yggdrasil-data-$hashedUserId.json"
     }
 }
