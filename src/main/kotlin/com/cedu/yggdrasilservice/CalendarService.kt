@@ -47,6 +47,10 @@ class CalendarService(
         return jsonStr
     }
 
+    fun getCalendarDataForUser(userId: String): String {
+        return getCalendarData(fileName = userCalendarFileName(userId))
+    }
+
     fun updateCalendarData(file: MultipartFile, fileName: String = calendarName): File {
         if (file.isEmpty) throw IllegalArgumentException("file can not be empty")
 
@@ -74,5 +78,14 @@ class CalendarService(
         Files.write(targetPath, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
 
         return targetPath.toFile()
+    }
+
+    fun updateCalendarDataForUser(file: MultipartFile, userId: String): File {
+        return updateCalendarData(file = file, fileName = userCalendarFileName(userId))
+    }
+
+    private fun userCalendarFileName(userId: String): String {
+        val safeUserId = userId.replace(Regex("[^a-zA-Z0-9_-]"), "_")
+        return "yggdrasil-data-$safeUserId.json"
     }
 }

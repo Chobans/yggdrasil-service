@@ -12,15 +12,27 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.io.FileNotFoundException
 
 @RestController
 class CalendarController(
-    private val calendarService: CalendarService
+    private val calendarService: CalendarService,
+    private val authService: AuthService
 ) {
+    data class LoginRequest(val username: String)
+    data class LoginResponse(val token: String)
+
+    @PostMapping("/auth/login")
+    fun login(@RequestBody request: LoginRequest): ResponseEntity<Any> {
+        val token = authService.authenticate(request.username)
+            ?: return ResponseEntity("Неверные учетные данные", HttpStatus.UNAUTHORIZED)
+
+        return ResponseEntity.ok(LoginResponse(token))
+    }
 
     @Operation(summary = "Получить календарь", description = "Возвращает JSON-файл календаря как вложение")
     @ApiResponses(value = [
@@ -44,10 +56,15 @@ class CalendarController(
         ApiResponse(responseCode = "500", description = "Ошибка сервиса")
     ])
     @GetMapping("/calendar", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getCalendar(): ResponseEntity<Any> {
+    fun getCalendar(
+        @RequestHeader(value = "Authorization", required = false) authorization: String?,
+    ): ResponseEntity<Any> {
+        val userId = authService.resolveUserId(authorization)
+            ?: return ResponseEntity("Требуется валидный токен", HttpStatus.UNAUTHORIZED)
+
         return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_JSON)
-            .body(calendarService.getCalendarData())
+            .body(calendarService.getCalendarDataForUser(userId))
     }
 
     @Operation(summary = "Обновить календарь", description = "Загрузить JSON-файл (поле calendar_data) и сохранить его, перезаписывая существующий")
@@ -78,9 +95,13 @@ class CalendarController(
     )
     fun updateCalendar(
         @RequestParam("calendar_data") calendarData: MultipartFile,
+        @RequestHeader(value = "Authorization", required = false) authorization: String?,
     ): ResponseEntity<Any> {
+        val userId = authService.resolveUserId(authorization)
+            ?: return ResponseEntity("Требуется валидный токен", HttpStatus.UNAUTHORIZED)
+
         return try {
-            val updatedFile = calendarService.updateCalendarData(calendarData)
+            val updatedFile = calendarService.updateCalendarDataForUser(calendarData, userId)
             ResponseEntity.ok("Календарь успешно обновлен: ${updatedFile.name}")
         } catch (ex: IllegalArgumentException) {
             ResponseEntity(ex.message ?: "Ошибка с файлом", HttpStatus.BAD_REQUEST)
