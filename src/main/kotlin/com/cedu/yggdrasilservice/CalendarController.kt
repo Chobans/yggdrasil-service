@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
-@RestController
+@RestController("/api/v1/yggdrasil")
 class CalendarController(
     private val calendarService: CalendarService,
     private val authService: AuthService
