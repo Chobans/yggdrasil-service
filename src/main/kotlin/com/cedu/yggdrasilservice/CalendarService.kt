@@ -1,27 +1,50 @@
 package com.cedu.yggdrasilservice
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
+import java.time.Instant
 
 
 @Service
-class CalendarService {
+class CalendarService(
+    private val dataStorePath: String = "/data/calendar/"
+) {
 
-    val dataStorePath = "/data/calendar/"
     val calendarName = "yggdrasil-data.json"
 
     fun getCalendarData(fileName: String = calendarName): String {
         val fsPath = Paths.get(dataStorePath, fileName)
         if (Files.exists(fsPath)) return fsPath.toFile().readText()
-        throw FileNotFoundException(fileName)
+
+        // Если файл не найден — создаём шаблонный JSON с пустым массивом events
+        val dirPath: Path = Paths.get(dataStorePath)
+        Files.createDirectories(dirPath)
+
+        val mapper = ObjectMapper()
+        val root: ObjectNode = mapper.createObjectNode()
+        root.put("version", 1)
+        root.put("generatedAt", Instant.now().toString())
+        val events: ArrayNode = mapper.createArrayNode()
+        root.set<ArrayNode>("events", events)
+
+        val jsonStr = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root)
+
+        try {
+            Files.write(fsPath, jsonStr.toByteArray(), StandardOpenOption.CREATE_NEW)
+        } catch (e: IOException) {
+            throw IOException("Failed to create calendar file at $fsPath", e)
+        }
+
+        return jsonStr
     }
 
     fun updateCalendarData(file: MultipartFile, fileName: String = calendarName): File {
