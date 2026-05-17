@@ -85,7 +85,7 @@ class CalendarService(
     }
 
     private fun userCalendarFileName(userId: String): String {
-        val safeUserId = userId.replace(Regex("[^a-zA-Z0-9_-]"), "_")
+        val safeUserId = userId.replace(Regex("[^a-zA-Z0-9]"), "_")
         return "yggdrasil-data-$safeUserId.json"
     }
 }
